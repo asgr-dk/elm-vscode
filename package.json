@@ -1,0 +1,22 @@
+{
+	"name": "elm-vscode",
+	"version": "0.1.0",
+	"activationEvents": [],
+	"engines": {
+		"vscode": "^1.140.0"
+	},
+	"main": "source/Main.ts",
+	"contributes": {
+		"commands": [
+			{
+				"command": "extension.helloWorld",
+				"title": "Hello World"
+			}
+		]
+	},
+	"scripts": {},
+	"devDependencies": {
+		"@types/node": "26.6.5",
+		"@types/vscode": "1.140.0"
+	}
+}
