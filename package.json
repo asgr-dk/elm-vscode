@@ -1,18 +1,26 @@
 {
 	"name": "elm-vscode",
+	"displayName": "Elm VSCode",
+	"description": "A basic language-extension for the Elm programming language",
+	"publisher": "asgr-dk",
+	"repository": "https://github.com/asgr-dk/elm-vscode",
 	"version": "0.1.0",
-	"activationEvents": [],
+	"activationEvents": [
+		"workspaceContains:**/elm.json"
+	],
 	"engines": {
 		"vscode": "^1.140.0"
 	},
 	"main": "source/Main.ts",
 	"contributes": {
-		"commands": [
-			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+		"configurationDefaults": {
+			"[elm]": {
+				"editor.tabSize": 4,
+				"editor.formatOnSave": true,
+				"editor.wordBasedSuggestions": "off"
 			}
-		],
+		},
+		"commands": [],
 		"languages": [
 			{
 				"id": "elm",
