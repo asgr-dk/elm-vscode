@@ -30,7 +30,7 @@
 			{
 				"language": "elm",
 				"scopeName": "source.elm",
-				"path": "./grammar.json"
+				"path": "./elm.tmLanguage.json"
 			}
 		]
 	},
