@@ -12,8 +12,31 @@
 				"command": "extension.helloWorld",
 				"title": "Hello World"
 			}
+		],
+		"languages": [
+			{
+				"id": "elm",
+				"aliases": [
+					"Elm",
+					"elm"
+				],
+				"extensions": [
+					".elm"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "elm",
+				"scopeName": "source.elm",
+				"path": "./grammar.json"
+			}
 		]
 	},
+	"categories": [
+		"Programming Languages"
+	],
 	"scripts": {},
 	"devDependencies": {
 		"@types/node": "26.6.5",
