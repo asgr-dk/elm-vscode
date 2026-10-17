@@ -1,7 +1,7 @@
 {
 	"name": "elm-vscode",
 	"displayName": "Elm VSCode",
-	"description": "A basic language-extension for the Elm programming language",
+	"description": "A basic language extension for the Elm programming language",
 	"publisher": "asgr-dk",
 	"repository": "https://github.com/asgr-dk/elm-vscode",
 	"version": "0.1.0",
@@ -20,7 +20,6 @@
 				"editor.wordBasedSuggestions": "off"
 			}
 		},
-		"commands": [],
 		"languages": [
 			{
 				"id": "elm",

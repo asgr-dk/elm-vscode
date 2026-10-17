@@ -92,5 +92,5 @@ async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticC
 }
 
 function problemToString(problem: { title: string, message: Array<{ bold: boolean, underline: boolean, color: string, string: string } | string> }): string {
-    return problem.message.reduce<string>((message, segment) => message + (typeof segment == "string" ? segment : segment.string), problem.title + "\n")
+    return problem.message.reduce<string>((message, segment) => message + (typeof segment == "string" ? segment : segment.string), problem.title + "\r\n")
 }
