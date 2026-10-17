@@ -46,9 +46,12 @@ async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticC
         execFile("elm", elmMakeParams,
             { cwd: fileWorkspace.uri.fsPath },
             function (error, _, stderr) {
-                const elmJsonUri = Uri.joinPath(fileWorkspace.uri, "elm.json")
                 if (error) {
+                    if (error?.path === "elm" && error?.code === "ENOENT") {
+                        return window.showErrorMessage("elm not found");
+                    }
                     const stderrJSON = JSON.parse(stderr)
+                    const elmJsonUri = Uri.joinPath(fileWorkspace.uri, "elm.json")
                     switch (stderrJSON.type) {
                         case "error": {
                             if (stderrJSON.path === "elm.json") {
