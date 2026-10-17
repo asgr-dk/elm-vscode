@@ -24,4 +24,4 @@ jobs:
       - name: Publish to Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: npx @vscode/vsce publish --dry-run
+        run: npx @vscode/vsce publish
