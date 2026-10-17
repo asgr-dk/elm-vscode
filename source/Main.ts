@@ -7,8 +7,6 @@ import {
     type DiagnosticCollection
 } from "vscode"
 
-
-
 export function activate(context: ExtensionContext) {
     const diagnostics = languages.createDiagnosticCollection("Elm VSCode")
     context.subscriptions.push(diagnostics)
