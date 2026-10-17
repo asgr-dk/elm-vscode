@@ -37,50 +37,62 @@ async function provideDocumentFormattingEdits(document: TextDocument, _: Formatt
 }
 
 async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticCollection) {
-    if (document.fileName.endsWith(".elm") == false) return
-    const fileWorkspace = workspace.getWorkspaceFolder(document.uri);
-    if (fileWorkspace === undefined) return window.showErrorMessage("Failed to find file in current workspace");
-    const elmMakeOutputParam = process.platform === "win32" ? "--output=NUL" : "--output=/dev/null";
-    execFile(
-        "elm",
-        ["make", `${document.fileName}`, "--report=json", elmMakeOutputParam],
-        { cwd: fileWorkspace.uri.fsPath },
-        function (error, _, stderr) {
-            const elmJsonUri = Uri.joinPath(fileWorkspace.uri, "elm.json")
-            diagnostics.delete(elmJsonUri)
-            if (error) {
-                const stderrJSON = JSON.parse(stderr)
-                switch (stderrJSON.type) {
-                    case "error": {
-                        if (stderrJSON.path === "elm.json") {
-                            diagnostics.set(elmJsonUri, [
-                                new Diagnostic(
-                                    new Range(
-                                        new Position(0, 0),
-                                        new Position(Number.MAX_VALUE, Number.MAX_VALUE)),
-                                    stderrJSON.title
-                                )
-                            ])
-                        }
-                    }
-                    case "compile-errors": {
-                        return stderrJSON.errors.forEach((error: any) => {
-                            diagnostics.set(
-                                Uri.file(error.path),
-                                error.problems.map((problem: any) =>
+    if (document.fileName.endsWith(".elm") || document.fileName.endsWith("elm.json")) {
+        const fileWorkspace = workspace.getWorkspaceFolder(document.uri);
+        if (fileWorkspace === undefined) return window.showErrorMessage("Failed to find file in current workspace");
+        const elmMakeOutputParam = process.platform === "win32" ? "--output=NUL" : "--output=/dev/null";
+        const elmMakeParams = ["make", "--report=json", elmMakeOutputParam];
+        if (document.fileName.endsWith(".elm")) elmMakeParams.push(document.fileName)
+        execFile("elm", elmMakeParams,
+            { cwd: fileWorkspace.uri.fsPath },
+            function (error, _, stderr) {
+                const elmJsonUri = Uri.joinPath(fileWorkspace.uri, "elm.json")
+                if (error) {
+                    const stderrJSON = JSON.parse(stderr)
+                    switch (stderrJSON.type) {
+                        case "error": {
+                            if (stderrJSON.path === "elm.json") {
+
+                                diagnostics.set(elmJsonUri, [
                                     new Diagnostic(
                                         new Range(
-                                            new Position(problem.region.start.line - 1, problem.region.start.column),
-                                            new Position(problem.region.end.line - 1, problem.region.end.column)
-                                        ),
-                                        problem.title)
-                                )
-                            )
-                        })
+                                            new Position(0, 0),
+                                            new Position(Number.MAX_VALUE, Number.MAX_VALUE)),
+                                        problemToString(stderrJSON)
+                                    )
+                                ])
+                            }
+                            break;
+                        }
+                        case "compile-errors": {
+                            diagnostics.delete(elmJsonUri)
+                            stderrJSON.errors.forEach((error: any) => {
+                                diagnostics.set(
+                                    Uri.file(error.path),
+                                    error.problems.map((problem: any) =>
+                                        new Diagnostic(
+                                            new Range(
+                                                new Position(problem.region.start.line - 1, problem.region.start.column - 1),
+                                                new Position(problem.region.end.line - 1, problem.region.end.column - 1)
+                                            ),
+                                            problemToString(problem)
+                                        )
+                                    ))
+                            })
+                            break;
+                        }
+                        default:
+                            window.showErrorMessage(`Unrecognized error: ${JSON.stringify(stderrJSON)}`);
+                            break;
                     }
-                    default: return window.showErrorMessage(`Unrecognized error: ${JSON.stringify(stderrJSON)}`)
+                } else {
+                    diagnostics.delete(document.uri)
                 }
-            }
-            return diagnostics.delete(document.uri)
-        })
+
+            })
+    }
+}
+
+function problemToString(problem: { title: string, message: Array<{ bold: boolean, underline: boolean, color: string, string: string } | string> }): string {
+    return problem.message.reduce<string>((message, segment) => message + (typeof segment == "string" ? segment : segment.string), problem.title + "\n")
 }
