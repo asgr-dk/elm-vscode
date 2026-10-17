@@ -5,9 +5,6 @@ on:
 
 jobs:
   publish:
-    permissions:
-      contents: read
-      id-token: write
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v4
@@ -25,4 +22,6 @@ jobs:
           name: vscode-extension
           path: '*.vsix'
       - name: Publish to Marketplace
-        run: npx @vscode/vsce publish --oidc
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx @vscode/vsce publish --dry-run
