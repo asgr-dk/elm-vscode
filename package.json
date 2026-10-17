@@ -5,7 +5,7 @@
 	"publisher": "asgr-dk",
 	"repository": "https://github.com/asgr-dk/elm-vscode",
 	"icon": "./logo.jpg",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"activationEvents": [
 		"workspaceContains:**/elm.json"
 	],
