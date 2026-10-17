@@ -4,7 +4,8 @@
 	"description": "A basic language extension for the Elm programming language",
 	"publisher": "asgr-dk",
 	"repository": "https://github.com/asgr-dk/elm-vscode",
-	"version": "0.1.0",
+	"icon": "./logo.jpg",
+	"version": "0.2.0",
 	"activationEvents": [
 		"workspaceContains:**/elm.json"
 	],

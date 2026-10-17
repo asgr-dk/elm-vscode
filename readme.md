@@ -2,6 +2,8 @@
 
 My personal language extension for Elm in VSCode
 
+![](/logo.jpg)
+
 ## Features
 
 - Syntax Highlighting
