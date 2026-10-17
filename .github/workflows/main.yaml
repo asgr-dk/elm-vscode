@@ -15,4 +15,4 @@ jobs:
       - name: Install Visual Studio Code Extension Manager
         run: npm install @vscode/vsce@4.0.1-3
       - name: TODO
-        run: vsce --help
+        run: npx @vscode/vsce --help
