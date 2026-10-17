@@ -52,7 +52,6 @@ async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticC
                     switch (stderrJSON.type) {
                         case "error": {
                             if (stderrJSON.path === "elm.json") {
-
                                 diagnostics.set(elmJsonUri, [
                                     new Diagnostic(
                                         new Range(
@@ -88,7 +87,6 @@ async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticC
                 } else {
                     diagnostics.delete(document.uri)
                 }
-
             })
     }
 }
