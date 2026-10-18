@@ -1,9 +1,12 @@
 {
 	"name": "elm-vscode",
 	"displayName": "Elm VSCode",
+	"type": "module",
 	"description": "A basic language extension for the Elm programming language",
 	"publisher": "asgr-dk",
-	"repository": "https://github.com/asgr-dk/elm-vscode",
+	"repository": {
+		"url": "https://github.com/asgr-dk/elm-vscode"
+	},
 	"icon": "./logo.jpg",
 	"version": "0.3.0",
 	"activationEvents": [
