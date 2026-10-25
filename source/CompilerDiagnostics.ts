@@ -1,81 +1,61 @@
-import { execFile } from "node:child_process";
+import { type ExecException } from "child_process";
 import {
     type ExtensionContext, type TextDocument, type DiagnosticCollection,
-    Diagnostic, Position, Range, Uri, languages, workspace, window,
+    Diagnostic, Position, Range, Uri, languages, workspace, window, commands,
 } from "vscode";
 
-export default function activate(context: ExtensionContext) {
+import { entireDocumentRange, execFileAsync, nullDevicePath, parseJSON } from "./Help.ts"
+
+export default async function activate(context: ExtensionContext) {
     const diagnostics = languages.createDiagnosticCollection("Elm VSCode")
-
     context.subscriptions.push(diagnostics)
-    context.subscriptions.push(workspace.onDidSaveTextDocument(document => onFileSaveOrOpen(document, diagnostics)))
-    context.subscriptions.push(workspace.onDidOpenTextDocument(document => onFileSaveOrOpen(document, diagnostics)))
-
-    if (window.activeTextEditor) onFileSaveOrOpen(window.activeTextEditor.document, diagnostics)
+    context.subscriptions.push(workspace.onDidSaveTextDocument(async document => await onFileSaveOrOpen(document, diagnostics)))
+    context.subscriptions.push(workspace.onDidOpenTextDocument(async document => await onFileSaveOrOpen(document, diagnostics)))
+    if (window.activeTextEditor) await onFileSaveOrOpen(window.activeTextEditor.document, diagnostics)
 }
 
 async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticCollection) {
-    if (document.fileName.endsWith(".elm") || document.fileName.endsWith("elm.json")) {
-        const fileWorkspace = workspace.getWorkspaceFolder(document.uri);
-        if (fileWorkspace === undefined) return window.showErrorMessage("Failed to find file in current workspace");
-        const elmMakeOutputParam = process.platform === "win32" ? "--output=NUL" : "--output=/dev/null";
-        const elmMakeParams = ["make", "--report=json", elmMakeOutputParam];
-        if (document.fileName.endsWith(".elm")) elmMakeParams.push(document.fileName)
-        execFile("elm", elmMakeParams,
-            { cwd: fileWorkspace.uri.fsPath },
-            function (error, _, stderr) {
-                if (error) {
-                    if (error?.path === "elm" && error?.code === "ENOENT") {
-                        return window.showErrorMessage("elm not found");
-                    }
-                    const stderrJSON = JSON.parse(stderr)
-                    const elmJsonUri = Uri.joinPath(fileWorkspace.uri, "elm.json")
-                    switch (stderrJSON.type) {
-                        case "error": {
-                            if (stderrJSON.path === "elm.json") {
-                                diagnostics.set(elmJsonUri, [
-                                    new Diagnostic(
-                                        new Range(
-                                            new Position(0, 0),
-                                            new Position(Number.MAX_VALUE, Number.MAX_VALUE)),
-                                        problemToString(stderrJSON)
-                                    )
-                                ])
-                            }
-                            break;
-                        }
-                        case "compile-errors": {
-                            diagnostics.delete(elmJsonUri)
-                            stderrJSON.errors.forEach((error: any) => {
-                                diagnostics.set(
-                                    Uri.file(error.path),
-                                    error.problems.map((problem: any) =>
-                                        new Diagnostic(
-                                            new Range(
-                                                new Position(problem.region.start.line - 1, problem.region.start.column - 1),
-                                                new Position(problem.region.end.line - 1, problem.region.end.column - 1)
-                                            ),
-                                            problemToString(problem)
-                                        )
-                                    ))
-                            })
-                            break;
-                        }
-                        default:
-                            window.showErrorMessage(`Unrecognized error: ${JSON.stringify(stderrJSON)}`);
-                            break;
-                    }
-                } else {
-                    diagnostics.delete(document.uri)
-                }
-            })
+    if ([".elm", "elm.json"].some(postfix => document.fileName.endsWith(postfix)) === false) return;
+    const compilerPath = workspace.getConfiguration().get<string>("compilerPath", "elm");
+    const compilerArgs = ["make", "--report=json", `--output=${nullDevicePath()}`];
+    if (document.uri.path.endsWith(".elm")) compilerArgs.push(document.fileName)
+    const workspaceFolder = workspace.getWorkspaceFolder(document.uri)
+    if (workspaceFolder === undefined) return window.showErrorMessage("Workspace for current file not found")
+    const promise = execFileAsync(compilerPath, compilerArgs, { cwd: workspaceFolder.uri.fsPath })
+    const processError = await promise
+        .then<null>(_ => null)
+        .catch<ExecException>(error => error)
+    const elmJsonUri = Uri.joinPath(workspaceFolder.uri, "elm.json")
+    if (processError === null) return diagnostics.clear();
+    if (processError.code === "ENOENT") return window.showErrorMessage("compilerPath not found")
+    const [compilerError, parseError] = await parseJSON(processError.stderr as string)
+        .then<[any, null]>((json: any) => [json, null])
+        .catch<[null, Error]>(parseError => [null, parseError])
+    if (parseError) return window.showErrorMessage(`Failed to parse error from Elm: ${parseError.message}`)
+    if (compilerError.type === "error" && compilerError.path === "elm.json")
+        return diagnostics.set(elmJsonUri, [new Diagnostic(entireDocumentRange(), compilerErrorToString(compilerError))])
+    if (compilerError.type === "compile-errors") {
+        diagnostics.delete(elmJsonUri)
+        return compilerError.errors.forEach((entry: any) =>
+            diagnostics.set(Uri.file(entry.path), entry.problems.map((problem: any) =>
+                new Diagnostic(compilerErrorRegionToRange(problem.region), compilerErrorToString(problem))
+            ))
+        )
     }
+    return window.showErrorMessage(`Unrecognized error: ${JSON.stringify(compilerError)}`)
 }
 
-function problemToString(problem: { title: string, message: Array<{ bold: boolean, underline: boolean, color: string, string: string } | string> }): string {
-    return problem.message.reduce<string>((message, segment) =>
+function compilerErrorRegionToRange(region: any): Range {
+    return new Range(
+        new Position(region.start.line - 1, region.start.column - 1),
+        new Position(region.end.line - 1, region.end.column - 1)
+    )
+}
+
+function compilerErrorToString(compilerError: { title: string, message: Array<{ bold: boolean, underline: boolean, color: string, string: string } | string> }): string {
+    return compilerError.message.reduce<string>((message, segment) =>
         message + (typeof segment == "string"
             ? segment
             : segment.string),
-        problem.title + "\r\n")
+        compilerError.title + "\r\n")
 }

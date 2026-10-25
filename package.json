@@ -8,7 +8,7 @@
 		"url": "https://github.com/asgr-dk/elm-vscode"
 	},
 	"icon": "./logo.jpg",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"activationEvents": [
 		"workspaceContains:**/elm.json"
 	],
@@ -22,6 +22,21 @@
 				"editor.tabSize": 4,
 				"editor.formatOnSave": true,
 				"editor.wordBasedSuggestions": "off"
+			}
+		},
+		"configuration": {
+			"title": "Elm VSCode",
+			"properties": {
+				"formatterPath": {
+					"type": "string",
+					"default": "elm-format",
+					"description": "The path to the elm formatter."
+				},
+				"compilerPath": {
+					"type": "string",
+					"default": "elm",
+					"description": "The path to the elm compiler."
+				}
 			}
 		},
 		"languages": [
