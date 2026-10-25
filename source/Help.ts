@@ -1,6 +1,8 @@
-import { Position, Range } from "vscode"
-import { execFile } from "child_process";
-import { promisify } from "util"
+import { Position, Range, workspace } from "vscode"
+import { execFile } from "node:child_process";
+import { promisify } from "node:util"
+import { homedir } from "node:os"
+import { join } from "node:path"
 
 export const execFileAsync = promisify(execFile)
 
@@ -18,4 +20,10 @@ export async function parseJSON(text: string): Promise<unknown> {
     } catch (error) {
         return Promise.reject(error)
     }
+}
+
+export function getElmHome() {
+    return process.env.ELM_HOME || process.platform === "win32"
+        ? join(homedir(), 'AppData', 'Roaming', 'elm')
+        : join(homedir(), '.elm')
 }

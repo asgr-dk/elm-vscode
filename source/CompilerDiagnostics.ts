@@ -1,4 +1,4 @@
-import { type ExecException } from "child_process";
+import { type ExecException } from "node:child_process";
 import {
     type ExtensionContext, type TextDocument, type DiagnosticCollection,
     Diagnostic, Position, Range, Uri, languages, workspace, window, commands,

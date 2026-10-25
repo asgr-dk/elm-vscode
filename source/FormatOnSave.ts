@@ -1,4 +1,4 @@
-import { type ExecException } from "child_process";
+import { type ExecException } from "node:child_process";
 import {
     type CancellationToken, type FormattingOptions,
     type ExtensionContext, type TextDocument,
