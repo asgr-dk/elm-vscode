@@ -27,15 +27,15 @@
 		"configuration": {
 			"title": "Elm VSCode",
 			"properties": {
-				"formatterPath": {
-					"type": "string",
-					"default": "elm-format",
-					"description": "The path to the elm formatter."
-				},
 				"compilerPath": {
 					"type": "string",
 					"default": "elm",
-					"description": "The path to the elm compiler."
+					"description": "The path to the elm compiler. Default value is \"elm\"."
+				},
+				"formatterPath": {
+					"type": "string",
+					"default": "elm-format",
+					"description": "The path to the elm formatter. Default value is \"elm-format\"."
 				}
 			}
 		},

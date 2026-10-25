@@ -2,7 +2,7 @@ import { type ExecException } from "child_process";
 import {
     type CancellationToken, type FormattingOptions,
     type ExtensionContext, type TextDocument,
-    TextEdit, window, languages, workspace
+    TextEdit, window, languages, workspace, commands
 } from "vscode";
 
 import { execFileAsync, entireDocumentRange } from "./Help.ts";
@@ -24,7 +24,9 @@ async function provideDocumentFormattingEdits(document: TextDocument, _: Formatt
     if (error) {
         switch (error.code) {
             case 1: window.showErrorMessage((error.stderr as string).replace("<STDIN>", document.fileName.split("/").pop() || "<STDIN>")); break;
-            case "ENOENT": window.showErrorMessage("formatterPath not found."); break;
+            case "ENOENT": window.showErrorMessage("formatterPath not found.", "Go to Settings").then(async action => {
+                if (action === "Go to Settings") await commands.executeCommand('workbench.action.openSettings', '@ext:asgr-dk.elm-vscode');
+            }); break;
             default: window.showErrorMessage(`Unrecognized error: ${JSON.stringify(error)}`); break;
         }
     }

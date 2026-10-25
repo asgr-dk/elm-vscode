@@ -15,10 +15,12 @@ export default async function activate(context: ExtensionContext) {
 }
 
 async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticCollection) {
-    if ([".elm", "elm.json"].some(postfix => document.fileName.endsWith(postfix)) === false) return;
+    const isElmJson = document.fileName.endsWith("elm.json")
+    const isElmModule = document.fileName.endsWith(".elm")
+    if (!isElmJson && !isElmModule) return;
     const compilerPath = workspace.getConfiguration().get<string>("compilerPath", "elm");
     const compilerArgs = ["make", "--report=json", `--output=${nullDevicePath()}`];
-    if (document.uri.path.endsWith(".elm")) compilerArgs.push(document.fileName)
+    if (isElmModule) compilerArgs.push(document.fileName)
     const workspaceFolder = workspace.getWorkspaceFolder(document.uri)
     if (workspaceFolder === undefined) return window.showErrorMessage("Workspace for current file not found")
     const promise = execFileAsync(compilerPath, compilerArgs, { cwd: workspaceFolder.uri.fsPath })
@@ -27,13 +29,18 @@ async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticC
         .catch<ExecException>(error => error)
     const elmJsonUri = Uri.joinPath(workspaceFolder.uri, "elm.json")
     if (processError === null) return diagnostics.clear();
-    if (processError.code === "ENOENT") return window.showErrorMessage("compilerPath not found")
+    if (processError.code === "ENOENT") return window.showErrorMessage("compilerPath not found", "Go to Settings").then(async action => {
+        if (action === "Go to Settings") await commands.executeCommand('workbench.action.openSettings', '@ext:asgr-dk.elm-vscode');
+    })
     const [compilerError, parseError] = await parseJSON(processError.stderr as string)
         .then<[any, null]>((json: any) => [json, null])
         .catch<[null, Error]>(parseError => [null, parseError])
     if (parseError) return window.showErrorMessage(`Failed to parse error from Elm: ${parseError.message}`)
     if (compilerError.type === "error" && compilerError.path === "elm.json")
         return diagnostics.set(elmJsonUri, [new Diagnostic(entireDocumentRange(), compilerErrorToString(compilerError))])
+    if (compilerError.type === "error" && compilerError.path === null && isElmJson) {
+        return diagnostics.delete(elmJsonUri)
+    }
     if (compilerError.type === "compile-errors") {
         diagnostics.delete(elmJsonUri)
         return compilerError.errors.forEach((entry: any) =>
