@@ -8,7 +8,7 @@
 		"url": "https://github.com/asgr-dk/elm-vscode"
 	},
 	"icon": "./logo.jpg",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"activationEvents": [
 		"workspaceContains:**/elm.json"
 	],
