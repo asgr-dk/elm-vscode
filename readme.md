@@ -4,6 +4,8 @@ My personal language extension for Elm in VSCode
 
 ![](/logo.jpg)
 
+[Open with VSCode](vscode:extension/asgr-dk.elm-vscode)
+
 ## Features
 
 - Format On Save
@@ -11,6 +13,7 @@ My personal language extension for Elm in VSCode
 - Compiler Diagnostics
 
 I'm working on:
+
 - Code Completion
 
 ## Requirements
