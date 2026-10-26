@@ -9,20 +9,18 @@ My personal language extension for Elm in VSCode
 - Format On Save
 - Syntax Highlighting
 - Compiler Diagnostics
+
+I'm working on:
 - Code Completion
 
 ## Requirements
+
+Supported platforms are windows, macos, & linux.
 
 | binary     | version   | releases                                    |
 | ---------- | --------- | ------------------------------------------- |
 | elm        | >= 0.19.1 | https://github.com/elm/compiler/releases    |
 | elm-format | >= 0.8.8  | https://github.com/avh4/elm-format/releases |
-
-| platform |
-| -------- |
-| windows  |
-| macos    |
-| linux    |
 
 ## Development
 
