@@ -4,7 +4,7 @@ My personal language extension for Elm in VSCode
 
 ![](/logo.jpg)
 
-[Open with VSCode](vscode:extension/asgr-dk.elm-vscode)
+<a href="vscode:extension/asgr-dk.elm-vscode">Open with VSCode</a>
 
 ## Features
 
