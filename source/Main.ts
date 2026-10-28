@@ -1,14 +1,13 @@
-import { type ExtensionContext, window } from "vscode"
+import { type ExtensionContext } from "vscode"
+import { Elm } from "../build/main.js"
 
-import activateCompilerDiagnostics from "./CompilerDiagnostics.ts"
-import activateCodeCompletion from "./CodeCompletion.ts"
-import activateFormatOnSave from "./FormatOnSave.ts"
-
-export async function activate(context: ExtensionContext) {
-    if (["win32", "darwin", "linux"].some(arch => arch === process.platform)) {
-        await activateCompilerDiagnostics(context)
-        await activateCodeCompletion(context)
-        await activateFormatOnSave(context)
-    }
-    else window.showErrorMessage("Unsupported platform")
+export function activate(context: ExtensionContext) {
+    const flags = {}
+    const { ports: { input, output } } = Elm.Main.init({ flags });
+    input.send("hello")
+    output.subscribe(function (msg: unknown) {
+        switch (msg) {
+            default: console.log(msg)
+        }
+    })
 }
