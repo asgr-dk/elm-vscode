@@ -18,11 +18,13 @@ jobs:
         set -euo pipefail
         elm make source/Main.elm --optimize --output=build/main.js
         sed -i 's/(this));/(globalThis));export const Elm = globalThis.Elm;/g' build/main.js
-        esbuild --bundle --allow-overwrite --minify --outfile=_extension/source/Main.ts --pure:F \
+        esbuild --bundle --allow-overwrite --minify --outfile=_extension/build/main.js --pure:F \
           --pure:F2 --pure:F3 --pure:F4 --pure:F5 --pure:F6 --pure:F7 --pure:F8 --pure:F9 \
           --pure:A2 --pure:A3 --pure:A4 --pure:A5 --pure:A6 --pure:A7 --pure:A8 --pure:A9 \
-          source/Main.ts
-        mv elm.tmLanguage.json language-configuration.json license.md logo.jpg package.json readme.md _extension
+          build/main.js
+        mkdir -p _extension/source
+        mv source/Main.ts _extension/source
+        mv build  elm.tmLanguage.json  language-configuration.json license.md logo.jpg package.json readme.md _extension
     - uses: actions/upload-artifact@v7
       if: github.ref_type == 'tag'
       with:
