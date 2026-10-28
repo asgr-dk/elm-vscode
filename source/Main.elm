@@ -1,7 +1,7 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Json.Decode
-import Port
+import Json.Encode
 
 
 type alias Flags =
@@ -13,7 +13,30 @@ type alias Model =
 
 
 type Msg
-    = SendOutput String
+    = DoNothing
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( {}, Cmd.none )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        DoNothing ->
+            ( model, Cmd.none )
+
+
+subs : Model -> Sub Msg
+subs model =
+    Sub.none
+
+
+port output : Json.Encode.Value -> Cmd msg
+
+
+port input : (Json.Decode.Value -> msg) -> Sub msg
 
 
 main : Program Flags Model Msg
@@ -23,25 +46,3 @@ main =
         , update = update
         , subscriptions = subs
         }
-
-
-init flags =
-    ( {}, Cmd.none )
-
-
-update msg model =
-    case msg of
-        SendOutput text ->
-            ( model, Port.send (Port.Output text) )
-
-
-subs model =
-    Port.subscribe
-        (\input ->
-            case input of
-                Port.InputError error ->
-                    SendOutput (Json.Decode.errorToString error)
-
-                Port.Input text ->
-                    SendOutput text
-        )
