@@ -4,7 +4,7 @@ import {
     Diagnostic, Position, Range, Uri, languages, workspace, window, commands,
 } from "vscode";
 
-import { entireDocumentRange, execFileAsync, nullDevicePath, parseJSON } from "./Help.ts"
+import { entireDocumentRange, execFileAsync, nullDevicePath, parseJsonAsync } from "./Help.ts"
 
 export default async function activate(context: ExtensionContext) {
     const diagnostics = languages.createDiagnosticCollection("Elm VSCode")
@@ -32,9 +32,9 @@ async function onFileSaveOrOpen(document: TextDocument, diagnostics: DiagnosticC
     if (processError.code === "ENOENT") return window.showErrorMessage("compilerPath not found", "Go to Settings").then(async action => {
         if (action === "Go to Settings") await commands.executeCommand('workbench.action.openSettings', '@ext:asgr-dk.elm-vscode');
     })
-    const [compilerError, parseError] = await parseJSON(processError.stderr as string)
+    const [compilerError, parseError] = await parseJsonAsync(processError.stderr as string)
         .then<[any, null]>((json: any) => [json, null])
-        .catch<[null, Error]>(parseError => [null, parseError])
+        .catch<[null, Error]>((parseError: any) => [null, parseError])
     if (parseError) return window.showErrorMessage(`Failed to parse error from Elm: ${parseError.message}`)
     if (compilerError.type === "error" && compilerError.path === "elm.json")
         return diagnostics.set(elmJsonUri, [new Diagnostic(entireDocumentRange(), compilerErrorToString(compilerError))])

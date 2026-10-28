@@ -10,7 +10,7 @@ import {
     MarkdownString
 } from "vscode";
 
-import { parseJSON, toOrdinal } from "./Help.ts"
+import { parseJsonAsync, toOrdinal } from "./Help.ts"
 
 export default async function activate(context: ExtensionContext) {
     context.subscriptions.push(languages.registerCompletionItemProvider('elm', {
@@ -28,7 +28,7 @@ async function toCompletionItemsProvider(): Promise<(
         const workspaceFolder = workspace.getWorkspaceFolder(document.uri)
         if (workspaceFolder === undefined) return []
         const [elmJSON, elmJsonError] = await readFile(Uri.joinPath(workspaceFolder.uri, "elm.json").fsPath, { encoding: "utf8" })
-            .then<[unknown, null]>(async text => [await parseJSON(text), null])
+            .then<[unknown, null]>(async text => [await parseJsonAsync(text), null])
             .catch<[null, Error]>(error => [null, error])
         if (elmJsonError) {
             window.showErrorMessage(`Failed to get elm.json: ${elmJsonError.message}`)
@@ -40,7 +40,7 @@ async function toCompletionItemsProvider(): Promise<(
             ? join(homedir(), 'AppData', 'Roaming', 'elm')
             : join(homedir(), '.elm')
         const [coreDocs, coreDocsError] = await readFile(`${elmHome}/${elmVersion}/packages/elm/core/${elmCoreVersion}/docs.json`, { encoding: "utf8" })
-            .then<[unknown, null]>(async text => [await parseJSON(text), null])
+            .then<[unknown, null]>(async text => [await parseJsonAsync(text), null])
             .catch<[null, Error]>(error => [null, error])
         if (coreDocsError) {
             window.showErrorMessage(`Failed to get docs.json: ${coreDocsError.message}`)
@@ -99,7 +99,6 @@ async function toCompletionItemsProvider(): Promise<(
         const platformUnionCompletions = platform.unions.filter((union: any) => union.name === "Program").flatMap(flatpMapUnionsAndCasesIntoCompletionItems)
         const platformCmdUnionCompletions = platformCmd.unions.filter((union: any) => union.name === "Cmd").flatMap(flatpMapUnionsAndCasesIntoCompletionItems)
         const platformSubUnionCompletions = platformSub.unions.filter((union: any) => union.name === "Sub").flatMap(flatpMapUnionsAndCasesIntoCompletionItems)
-
         return [
             ...moduleNameCompletions,
             ...basicBinopCompletions,

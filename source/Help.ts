@@ -12,7 +12,7 @@ export function nullDevicePath() {
     return process.platform === "win32" ? "NUL" : "/dev/null"
 }
 
-export async function parseJSON(text: string): Promise<unknown> {
+export async function parseJsonAsync(text: string): Promise<unknown> {
     try {
         return Promise.resolve(JSON.parse(text))
     } catch (error) {
