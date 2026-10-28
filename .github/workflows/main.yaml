@@ -10,7 +10,7 @@ jobs:
       group: build-${{ github.ref }}
       cancel-in-progress: true
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: asgr-dk/actions/.github/actions/get-elm@1.0.0
     - uses: asgr-dk/actions/.github/actions/get-esbuild@1.0.0
     - name: Run build script
@@ -23,7 +23,7 @@ jobs:
           --pure:A2 --pure:A3 --pure:A4 --pure:A5 --pure:A6 --pure:A7 --pure:A8 --pure:A9 \
           source/Main.ts
         mv elm.tmLanguage.json language-configuration.json license.md logo.jpg package.json readme.md _extension
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: github.ref_type == 'tag'
       with:
         name: extension
@@ -38,7 +38,7 @@ jobs:
       group: deploy
       cancel-in-progress: false
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: extension
           path: _extension
@@ -54,7 +54,7 @@ jobs:
         run: npm install @vscode/vsce@4.0.1-3
       - name: Package Extension
         run: cd _extension && npx @vscode/vsce package
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: vscode-extension
           path: _extension/*.vsix
