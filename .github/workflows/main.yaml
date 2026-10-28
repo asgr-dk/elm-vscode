@@ -11,8 +11,8 @@ jobs:
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@v7
-    - uses: asgr-dk/actions/.github/actions/get-elm@1.0.0
-    - uses: asgr-dk/actions/.github/actions/get-esbuild@1.0.0
+    - uses: asgr-dk/actions/.github/actions/get-elm@1.2.0
+    - uses: asgr-dk/actions/.github/actions/get-esbuild@1.2.0
     - name: Run build script
       run: |
         set -euo pipefail
